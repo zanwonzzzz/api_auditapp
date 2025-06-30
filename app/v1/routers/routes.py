@@ -4,10 +4,10 @@ from dotenv import load_dotenv
 import os
 from fastapi.responses import JSONResponse
 
-app = FastAPI()
-divisiones = []
-load_dotenv()
 
+app = FastAPI()
+load_dotenv()
+#esta tabla va a estar guardada en cache para filtrarla en android
 @app.get("/consultas")
 async def test_example():
     conn = await aiomysql.connect(host=os.getenv('DB_HOST'), 
@@ -23,6 +23,8 @@ async def test_example():
     print(r)
     await cur.close()
     conn.close()
+
+#consultas simples 
 
 
 
