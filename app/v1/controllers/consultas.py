@@ -5,7 +5,7 @@ import os
 from fastapi.responses import JSONResponse
 load_dotenv()
 #consultas
-#esta tabla va a estar guardada en cache para filtrarla en android
+#esta tabla va a estar guardada en cache para filtrarla en android y con polling estar actualizando sin volverla a cargar
 
 async def conexion():
     conn = await aiomysql.connect(host=os.getenv('DB_HOST'), 
@@ -28,7 +28,10 @@ async def OrdenesSinAuditor():
 async def graficasAuditorias(inicio,fin,estatus_auditoria):
         conn = await conexion()
         cur = await conn.cursor()
-        sql = "SELECT COUNT(DISTINCT Folio_Pisa) as total_auditorias FROM Auditorias_Det WHERE `Estatus_Auditoria` = %s AND `Fecha_Inicio` >= %s AND `Fecha_Inicio` < %s"
+        if estatus_auditoria == 'PENDIENTE':
+            sql = "SELECT COUNT(DISTINCT Folio_Pisa) as total_auditorias FROM Auditorias_Det WHERE `Estatus_Auditoria` != %s AND `Fecha_Inicio` >= %s AND `Fecha_Inicio` < %s"
+        else:   
+             sql = "SELECT COUNT(DISTINCT Folio_Pisa) as total_auditorias FROM Auditorias_Det WHERE `Estatus_Auditoria` = %s AND `Fecha_Inicio` >= %s AND `Fecha_Inicio` < %s" 
         await cur.execute(sql,(inicio,fin,estatus_auditoria))
         print(cur.description)
         r = await cur.fetchall()

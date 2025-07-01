@@ -8,7 +8,7 @@ from app.v1.controllers.consultas import *
 app = FastAPI()
 load_dotenv()
 #esta tabla va a estar guardada en cache para filtrarla en android
-@app.get("/consultas")
+@app.get("/ordenes/sin")
 async def end_pointOrdenesSinAuditor():
     return await OrdenesSinAuditor()
 
