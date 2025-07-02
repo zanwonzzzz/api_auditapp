@@ -43,3 +43,6 @@ async def graficasAuditorias(inicio,fin,estatus_auditoria):
             },
             status_code=200
         )
+#estoi pensando en agregar notificaciones cuando se asgine una nueva auditoria 
+async def OrdenesPendientes(fk_auditor_auditoria_det=""):
+
