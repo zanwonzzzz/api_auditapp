@@ -3,6 +3,7 @@ import aiomysql
 from dotenv import load_dotenv
 import os
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 load_dotenv()
 #consultas
 #esta tabla va a estar guardada en cache para filtrarla en android y con polling estar actualizando sin volverla a cargar
@@ -45,4 +46,71 @@ async def graficasAuditorias(inicio,fin,estatus_auditoria):
         )
 #estoi pensando en agregar notificaciones cuando se asgine una nueva auditoria 
 async def OrdenesPendientes(fk_auditor_auditoria_det=""):
+    conn = await conexion()
+    cur = await conn.cursor()
+    sql = "SELECT DISTINCT ad.Folio_Pisa,tic.Terminal,tic.Puerto,tic.Distrito,tic.Tecnologia,COPE,ad.Estatus_Auditoria,tic.Latitud AS Latitud,tic.Longitud AS Longitud,analisis_bd.qm_tac_prod_bolsa.Latitud AS Latitud_Bolsa,analisis_bd.qm_tac_prod_bolsa.Longitud AS Longitud_Bolsa,tic.Direccion_Cliente FROM db_apps.Auditorias_Det AS ad INNER JOIN db_apps.tecnico_instalaciones_coordiapp AS tic ON ad.Folio_Pisa = tic.Folio_Pisa INNER JOIN db_apps.Auditores AS au ON ad.FK_Auditor_Auditoria_Det = au.idAuditor INNER JOIN db_apps.copes ON FK_Cope = id LEFT JOIN analisis_bd.qm_tac_prod_bolsa ON ad.Folio_Pisa = qm_tac_prod_bolsa.Folio_Pisa AND qm_tac_prod_bolsa.ORIGEN = 'bolsa' WHERE tic.Fecha_Asignacion_Auditor >= DATE_SUB(CURRENT_DATE(), INTERVAL 1 YEAR) AND ad.FK_Auditor_Auditoria_Det = %s AND ad.Estatus_Auditoria = 'PENDIENTE' ORDER BY tic.Fecha_Asignacion_Auditor ASC;"
+    await cur.execute(sql,(fk_auditor_auditoria_det))
+    print(cur.description)
+    r = await cur.fetchall()
+    await cur.close()
+    conn.close()
+    return JSONResponse (
+        content= {
+            'Ordenes Pendientes':r
+        },
+        status_code=200
+    )
 
+async def OrdenesDetalle(folio_pisa):
+    conn = await conexion()
+    cur = await conn.cursor()
+    sql = "SELECT ad.Folio_Pisa, tic.Terminal, tic.Puerto, tic.Distrito, tic.Tecnologia,  tic.Cliente_Titular, tic.Telefono_Cliente, COPE, ad.Estatus_Auditoria, tic.Latitud, tic.Longitud,tic.Direccion_Cliente,tic.Apellido_Paterno_Titular,tic.Apellido_Materno_Titular,ad.F_Terminal_Abierta_Cerrada FROM db_apps.Auditorias_Det AS ad INNER JOIN db_apps.tecnico_instalaciones_coordiapp AS tic ON ad.Folio_Pisa = tic.Folio_Pisa INNER JOIN db_apps.Auditores AS au ON ad.FK_Auditor_Auditoria_Det = au.idAuditor INNER JOIN db_apps.copes ON FK_Cope = id WHERE ad.Folio_Pisa = %s ORDER BY tic.Fecha_Asignacion_Auditor ASC;"
+    await cur.execute(sql,(folio_pisa))
+    print(cur.description)
+    r = await cur.fetchall()
+    await cur.close()
+    conn.close()
+    return JSONResponse (
+        content= {
+            'Detalle de Orden':r
+        },
+        status_code=200
+    )
+
+async def ValorClientePresente(folio_pisa,campos):
+    conn = await conexion()
+    cur = await conn.cursor()
+    sql =  f"SELECT {campos} FROM db_apps.Auditorias_Det WHERE Folio_Pisa = %s"
+    await cur.execute(sql,(folio_pisa))
+    print(cur.description)
+    r = await cur.fetchall()
+    await cur.close()
+    conn.close()
+    return JSONResponse (
+        content= {
+            'Valor':r
+        },
+        status_code=200
+    )
+
+
+
+#sirbe pero obio debo mandar los datos llenos pq sino se sobreescriben
+async def InsertNoExiste(folio_pisa,actu):
+    conn = await conexion()
+    cur = await conn.cursor()
+    sql = """
+    UPDATE db_apps.Auditorias_Det SET Foto_No_Ubicado= %s,Inicio_Traslado = %s,Evidencia_Instalacion = %s,P_Observaciones_Finales = %s,P_Domicilio = %s,Estatus_Auditoria = %s,lat_auditor = %s,lon_auditor = %s, 
+    Fecha_Fin = %s,Existe_Instalacion = %s WHERE Folio_Pisa = %s"""
+    await cur.execute(sql,(actu.Foto_No_Ubicado,actu.Inicio_Traslado,actu.Evidencia_Instalacion,actu.P_Observaciones_Finales,actu.P_Domicilio,actu.Estatus_Auditoria,actu.lat_auditor,actu.lon_auditor,actu.Fecha_Fin,actu.Existe_Instalacion,folio_pisa))
+    print(cur.description)
+    #para guardar cambios
+    await conn.commit()
+    await cur.close()
+    conn.close()
+    return JSONResponse (
+        content= {
+           'msg':'Insertado Exitosamente'
+        },
+        status_code=200
+    )
