@@ -13,6 +13,13 @@ load_dotenv()
 async def end_pointOrdenesSinAuditor():
     return await OrdenesSinAuditor()
 
+class Auditores(BaseModel):
+    user:str
+
+@app.post("/login")
+async def endpoint_Login(user:Auditores):
+    return await Login(user)
+
 #consultas del dashboard de auditorias
 #no puedo llamar directamente a una funcion debe estar dentro de otra funcion
 @app.get("/pendientes/{fk_auditor_auditoria_det}/")

@@ -14,7 +14,31 @@ async def conexion():
                                     user=os.getenv('DB_USERNAME'), 
                                     password=os.getenv('DB_PASSWORD'),
                                         db=os.getenv('DB_DATABASE'))
-    return conn                              
+    return conn        
+
+async def Login(user):
+    conn = await conexion()
+    cur = await conn.cursor()
+    sql = "SELECT * FROM Auditores WHERE user = %s"
+    await cur.execute(sql,(user.user))
+    r = await cur.fetchall()
+    await cur.close()
+    conn.close()
+    if user.user.upper() != r[0][4]:
+        return JSONResponse (
+                content= {
+                    'msg':'Usuario No Encontrado'
+                },
+                status_code=404
+            )
+    elif user.user.upper() == r[0][4]:
+        return JSONResponse (
+                content= {
+                    'msg':'Login Exitoso'
+                },
+                status_code=200
+            )
+
 async def OrdenesSinAuditor():
     conn = await conexion()
     cur = await conn.cursor()
@@ -136,7 +160,7 @@ async def DistritosPorCopes(id_cope):
 
     conn = await conexion()
     cur = await conn.cursor()
-   await cur.execute(sql = "SELECT id_distrito, distrito FROM distritos WHERE fk_cope = %s")
+    await cur.execute(sql = "SELECT id_distrito, distrito FROM distritos WHERE fk_cope = %s")
     print(cur.description)
     r = await cur.fetchall()
     await cur.close()

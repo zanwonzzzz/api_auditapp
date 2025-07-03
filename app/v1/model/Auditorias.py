@@ -9,3 +9,6 @@ class Auditorias(BaseModel):
     lon_auditor:str
     Fecha_Fin:str
     Existe_Instalacion:str
+
+class Auditores(BaseModel):
+    user:str
