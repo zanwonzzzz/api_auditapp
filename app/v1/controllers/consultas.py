@@ -115,11 +115,11 @@ async def InsertNoExiste(folio_pisa,actu):
         status_code=200
     )
 
-async def copes()
-{
+async def copes():
+
     conn = await conexion()
     cur = await conn.cursor()
-   await cur.execute(sql = "SELECT id,COPE FROM db_apps.copes")
+    await cur.execute(sql = "SELECT id,COPE FROM db_apps.copes")
     print(cur.description)
     r = await cur.fetchall()
     await cur.close()
@@ -130,10 +130,10 @@ async def copes()
         },
         status_code=200
     )
-}
 
-async def DistritosPorCopes(id_cope)
-{
+
+async def DistritosPorCopes(id_cope):
+
     conn = await conexion()
     cur = await conn.cursor()
    await cur.execute(sql = "SELECT id_distrito, distrito FROM distritos WHERE fk_cope = %s")
@@ -147,10 +147,10 @@ async def DistritosPorCopes(id_cope)
         },
         status_code=200
     )
-}
 
-async def ValidarFolio(folio_pisa)
-{
+
+async def ValidarFolio(folio_pisa):
+
     conn = await conexion()
     cur = await conn.cursor()
     await cur.execute(sql = "SELECT COUNT(*) FROM db_apps.tecnico_instalaciones_coordiapp  WHERE Folio_Pisa = %s")
@@ -164,4 +164,3 @@ async def ValidarFolio(folio_pisa)
         },
         status_code=200
     )
-}
