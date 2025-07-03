@@ -22,6 +22,7 @@ async def Login(user):
     sql = "SELECT * FROM Auditores WHERE user = %s"
     await cur.execute(sql,(user.user))
     r = await cur.fetchall()
+    print(r)
     await cur.close()
     conn.close()
     if user.user.upper() != r[0][4]:
