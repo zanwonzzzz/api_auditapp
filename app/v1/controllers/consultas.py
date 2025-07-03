@@ -114,3 +114,54 @@ async def InsertNoExiste(folio_pisa,actu):
         },
         status_code=200
     )
+
+async def copes()
+{
+    conn = await conexion()
+    cur = await conn.cursor()
+   await cur.execute(sql = "SELECT id,COPE FROM db_apps.copes")
+    print(cur.description)
+    r = await cur.fetchall()
+    await cur.close()
+    conn.close()
+    return JSONResponse (
+        content= {
+            'Copes':r
+        },
+        status_code=200
+    )
+}
+
+async def DistritosPorCopes(id_cope)
+{
+    conn = await conexion()
+    cur = await conn.cursor()
+   await cur.execute(sql = "SELECT id_distrito, distrito FROM distritos WHERE fk_cope = %s")
+    print(cur.description)
+    r = await cur.fetchall()
+    await cur.close()
+    conn.close()
+    return JSONResponse (
+        content= {
+            'Distritos por Cope':r
+        },
+        status_code=200
+    )
+}
+
+async def ValidarFolio(folio_pisa)
+{
+    conn = await conexion()
+    cur = await conn.cursor()
+    await cur.execute(sql = "SELECT COUNT(*) FROM db_apps.tecnico_instalaciones_coordiapp  WHERE Folio_Pisa = %s")
+    print(cur.description)
+    r = await cur.fetchall()
+    await cur.close()
+    conn.close()
+    return JSONResponse (
+        content= {
+            'Validacion del Folio':r
+        },
+        status_code=200
+    )
+}
