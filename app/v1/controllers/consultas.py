@@ -2,11 +2,33 @@ from fastapi import FastAPI
 import aiomysql
 from dotenv import load_dotenv
 import os
+from jose import jwt
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+from typing import Annotated
+from fastapi import Depends, FastAPI, HTTPException, Security, status
+from fastapi.security import (
+    OAuth2PasswordBearer,
+    OAuth2PasswordRequestForm,
+    SecurityScopes,
+)
+
 load_dotenv()
+#explicacion
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="token",
+    scopes={"me": "Read information about the current user.", "items": "Read items."},
+)
 #consultas
 #esta tabla va a estar guardada en cache para filtrarla en android y con polling estar actualizando sin volverla a cargar
+async def encode_token(payload:dict)->str:
+    token = jwt.encode(payload,"super-secret","HS256")
+    return token
+
+async def decode_token(token:Annotated[str,Depends(oauth2_scheme)])->dict:
+    user = jwt.decode(token,"super-secret","HS256")
+    return user
+
 
 async def conexion():
     conn = await aiomysql.connect(host=os.getenv('DB_HOST'), 
@@ -16,29 +38,27 @@ async def conexion():
                                         db=os.getenv('DB_DATABASE'))
     return conn        
 
-async def Login(user):
+async def authenticate_user(user:dict):
     conn = await conexion()
     cur = await conn.cursor()
     sql = "SELECT * FROM Auditores WHERE user = %s"
-    await cur.execute(sql,(user.user))
+    await cur.execute(sql,(user))
     r = await cur.fetchall()
-    print(r)
     await cur.close()
     conn.close()
-    if user.user.upper() != r[0][4]:
-        return JSONResponse (
-                content= {
-                    'msg':'Usuario No Encontrado'
-                },
-                status_code=404
-            )
-    elif user.user.upper() == r[0][4]:
-        return JSONResponse (
-                content= {
-                    'msg':'Login Exitoso'
-                },
-                status_code=200
-            )
+    #revisar esta condicion
+    if user != r[0][4]:
+        return  False
+    return user
+
+async def login(form_data:Annotated[OAuth2PasswordRequestForm,Depends()]):
+    user = await authenticate_user(form_data.user)
+    if not user:
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
+    users = {'user':user}
+    return await encode_token(users) 
+    
+
 
 async def OrdenesSinAuditor():
     conn = await conexion()

@@ -18,8 +18,11 @@ class Auditores(BaseModel):
 
 @app.post("/login")
 async def endpoint_Login(user:Auditores):
-    return await Login(user)
+    return await login(user)
 
+@app.get("/me")
+async def endpoint_me(user:Annotated[dict,Depends(decode_token)]):
+    return user
 #consultas del dashboard de auditorias
 #no puedo llamar directamente a una funcion debe estar dentro de otra funcion
 @app.get("/pendientes/{fk_auditor_auditoria_det}/")
