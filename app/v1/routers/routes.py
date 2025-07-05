@@ -15,7 +15,7 @@ class Auditores(BaseModel):
 @app.post("/login")
 async def endpoint_Login(user:Auditores):
     return await login(user)
-
+# guarda el token shares preferences y cuando sierre sesion pues se borra pero es desde android
 @app.get("/logout")
 async def endpoint_logout(token:str = Depends(oauth2_scheme)):
     return  JSONResponse(content={"msg":"Sesion Cerrada exitosamente"},status_code=200)
