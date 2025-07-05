@@ -9,10 +9,6 @@ from pydantic import BaseModel
 app = FastAPI()
 load_dotenv()
 #esta tabla va a estar guardada en cache para filtrarla en android
-@app.get("/ordenes/sin")
-async def end_pointOrdenesSinAuditor():
-    return await OrdenesSinAuditor()
-
 class Auditores(BaseModel):
     user:str
 
@@ -20,23 +16,28 @@ class Auditores(BaseModel):
 async def endpoint_Login(user:Auditores):
     return await login(user)
 
-@app.get("/me")
-async def endpoint_me(user:Annotated[dict,Depends(decode_token)]):
-    return user
+@app.get("/logout")
+async def endpoint_logout(token:str = Depends(oauth2_scheme)):
+    return  JSONResponse(content={"msg":"Sesion Cerrada exitosamente"},status_code=200)
 #consultas del dashboard de auditorias
 #no puedo llamar directamente a una funcion debe estar dentro de otra funcion
 @app.get("/pendientes/{fk_auditor_auditoria_det}/")
-async def endpoint_OrdenesPendientes(fk_auditor_auditoria_det):
+async def endpoint_OrdenesPendientes(fk_auditor_auditoria_det:int,
+    token:str = Depends(oauth2_scheme)):
     return await OrdenesPendientes(fk_auditor_auditoria_det)
     
 @app.get("/detalle/ordenes/{folio_pisa}/")
-async def endpoint_DetalleOrdenes(folio_pisa):
+async def endpoint_DetalleOrdenes(folio_pisa,
+    token:str =Depends(oauth2_scheme)):
     return await OrdenesDetalle(folio_pisa)  
 
 @app.get("/valores/{folio_pisa}/{campos}")
-async def endpoint_Valores(folio_pisa,campos):
+async def endpoint_Valores(
+    folio_pisa:str,
+    campos:str,
+    token:str = Depends(oauth2_scheme)):
     return await ValorClientePresente(folio_pisa,campos)  
-
+#ignorar los campos q no bengan
 class Auditorias(BaseModel):
     Evidencia_Instalacion:str | None = None
     P_Observaciones_Finales:str | None = None
@@ -50,7 +51,7 @@ class Auditorias(BaseModel):
     Inicio_Traslado :str | None = None
 
 @app.put("/no/existe/{folio_pisa}/")
-async def endpoint_InsertNoExiste(folio_pisa,actu:Auditorias):
+async def endpoint_InsertNoExiste(folio_pisa,actu:Auditorias,token:str=Depends(oauth2_scheme)):
     return await InsertNoExiste(folio_pisa,actu)  
 
 

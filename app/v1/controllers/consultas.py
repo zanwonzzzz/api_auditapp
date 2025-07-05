@@ -24,6 +24,8 @@ oauth2_scheme = OAuth2PasswordBearer(
 async def encode_token(payload:dict)->str:
     token = jwt.encode(payload,"super-secret","HS256")
     return token
+#le decimos con el depends que esperamos el token por los headers
+
 
 async def decode_token(token:Annotated[str,Depends(oauth2_scheme)])->dict:
     user = jwt.decode(token,"super-secret","HS256")
@@ -57,6 +59,7 @@ async def login(form_data:Annotated[OAuth2PasswordRequestForm,Depends()]):
         raise HTTPException(status_code=400, detail="Incorrect username or password")
     users = {'user':user}
     return await encode_token(users) 
+
     
 
 
