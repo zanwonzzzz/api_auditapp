@@ -12,7 +12,6 @@ router = APIRouter(
     dependencies= [Depends(oauth2_scheme)]
 )
 load_dotenv()
-#esta tabla va a estar guardada en cache para filtrarla en android
 class Auditores(BaseModel):
     user:str
 
@@ -23,7 +22,6 @@ async def endpoint_Login(user:Auditores,conn:str = Depends(conexion)):
 @router.get("/logout")
 async def endpoint_logout():
     return  JSONResponse(content={"msg":"Sesion Cerrada exitosamente"},status_code=200)
-#consultas del dashboard de auditorias
 #no puedo llamar directamente a una funcion debe estar dentro de otra funcion
 @router.get("/pendientes/{fk_auditor_auditoria_det}/")
 async def endpoint_OrdenesPendientes(fk_auditor_auditoria_det:int,conn:str = Depends(conexion)):

@@ -24,13 +24,11 @@ oauth2_scheme = OAuth2PasswordBearer(
 async def encode_token(payload:dict)->str:
     token = jwt.encode(payload,"super-secret","HS256")
     return token
-#le decimos con el depends que esperamos el token por los headers
-
+#el depends significa que pues dependemos de lo que realise tal funcion que se llama
 
 async def decode_token(token:Annotated[str,Depends(oauth2_scheme)])->dict:
     user = jwt.decode(token,"super-secret","HS256")
     return user
-
 
 async def conexion():
     conn = await aiomysql.connect(host=os.getenv('DB_HOST'), 
@@ -59,39 +57,6 @@ async def login(form_data:Annotated[OAuth2PasswordRequestForm,Depends()],conn=""
     users = {'user':user}
     return await encode_token(users) 
 
-    
-
-#erp de auditorias
-async def OrdenesSinAuditor():
-    conn = await conexion()
-    cur = await conn.cursor()
-    await cur.execute("SELECT tic.Folio_Pisa,d.Division,ad.Nombre_Auditor,ad.Apellido_Auditor,c.COPE,a.area,tic.Distrito,tic.Tecnologia,tic.Terminal,tic.Tipo_Instalacion,tic.Metraje,tic.FK_Auditor,ads.Asigno FROM tecnico_instalaciones_coordiapp tic LEFT JOIN copes c ON FK_Cope = c.id JOIN areas a ON c.FK_Area = a.idAreas JOIN divisiones d ON a.FK_Division = d.idDivision LEFT JOIN Auditores ad ON tic.FK_Auditor = ad.idAuditor LEFT JOIN Auditorias_Det ads ON tic.Folio_Pisa = ads.Folio_Pisa WHERE tic.Estatus_Orden = 'COMPLETADA' AND (tic.FK_Auditor = 0 OR ads.Estatus_Auditoria = 'PENDIENTE') AND tic.Step_Registro = 5 ORDER BY tic.Distrito ASC")
-    print(cur.description)
-    r = await cur.fetchall()
-    print(r)
-    await cur.close()
-    conn.close()
-
-#consultas del dashboard de auditorias
-async def graficasAuditorias(inicio,fin,estatus_auditoria):
-        conn = await conexion()
-        cur = await conn.cursor()
-        if estatus_auditoria == 'PENDIENTE':
-            sql = "SELECT COUNT(DISTINCT Folio_Pisa) as total_auditorias FROM Auditorias_Det WHERE `Estatus_Auditoria` != %s AND `Fecha_Inicio` >= %s AND `Fecha_Inicio` < %s"
-        else:   
-             sql = "SELECT COUNT(DISTINCT Folio_Pisa) as total_auditorias FROM Auditorias_Det WHERE `Estatus_Auditoria` = %s AND `Fecha_Inicio` >= %s AND `Fecha_Inicio` < %s" 
-        await cur.execute(sql,(inicio,fin,estatus_auditoria))
-        print(cur.description)
-        r = await cur.fetchall()
-        await cur.close()
-        conn.close()
-        return JSONResponse (
-            content= {
-                'total_auditorias':r
-            },
-            status_code=200
-        )
-#fin de erp de aufitorias
 #estoi pensando en agregar notificaciones cuando se asgine una nueva auditoria 
 async def OrdenesPendientes(fk_auditor_auditoria_det="",conn=""):
     cur = await conn.cursor()
@@ -116,12 +81,7 @@ async def OrdenesDetalle(folio_pisa,conn=""):
     r = await cur.fetchall()
     await cur.close()
     conn.close()
-    return JSONResponse (
-        content= {
-            'Detalle de Orden':r
-        },
-        status_code=200
-    )
+    return JSONResponse ( content= { 'Detalle de Orden':r},status_code=200)
 
 async def ValorClientePresente(folio_pisa,campos,conn=""):
     cur = await conn.cursor()
@@ -131,14 +91,7 @@ async def ValorClientePresente(folio_pisa,campos,conn=""):
     r = await cur.fetchall()
     await cur.close()
     conn.close()
-    return JSONResponse (
-        content= {
-            'Valor':r
-        },
-        status_code=200
-    )
-
-
+    return JSONResponse (content= {'Valor':r},status_code=200)
 
 #sirbe pero obio debo mandar los datos llenos pq sino se sobreescriben
 async def InsertNoExiste(folio_pisa,actu,conn=""):
@@ -152,12 +105,7 @@ async def InsertNoExiste(folio_pisa,actu,conn=""):
     await conn.commit()
     await cur.close()
     conn.close()
-    return JSONResponse (
-        content= {
-           'msg':'Insertado Exitosamente'
-        },
-        status_code=200
-    )
+    return JSONResponse (content= {'msg':'Insertado Exitosamente'},status_code=200)
 
 async def copes(conn=""):
     cur = await conn.cursor()
@@ -166,12 +114,7 @@ async def copes(conn=""):
     r = await cur.fetchall()
     await cur.close()
     conn.close()
-    return JSONResponse (
-        content= {
-            'Copes':r
-        },
-        status_code=200
-    )
+    return JSONResponse (content= {'Copes':r},status_code=200)
 
 
 async def DistritosPorCopes(id_cope,conn=""):
@@ -182,12 +125,7 @@ async def DistritosPorCopes(id_cope,conn=""):
     r = await cur.fetchall()
     await cur.close()
     conn.close()
-    return JSONResponse (
-        content= {
-            'Distritos por Cope':r
-        },
-        status_code=200
-    )
+    return JSONResponse (content= {'Distritos por Cope':r},status_code=200)
 
 
 async def ValidarFolio(folio_pisa,conn=""):
@@ -198,9 +136,4 @@ async def ValidarFolio(folio_pisa,conn=""):
     r = await cur.fetchall()
     await cur.close()
     conn.close()
-    return JSONResponse (
-        content= {
-            'Validacion del Folio':r
-        },
-        status_code=200
-    )
+    return JSONResponse (content= {'Validacion del Folio':r},status_code=200)
