@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI,APIRouter
 import aiomysql
 from dotenv import load_dotenv
 import os
@@ -7,36 +7,38 @@ from app.v1.controllers.consultas import *
 from pydantic import BaseModel
 
 app = FastAPI()
+router = APIRouter(
+    prefix="/api",
+    dependencies= [Depends(oauth2_scheme)]
+)
 load_dotenv()
 #esta tabla va a estar guardada en cache para filtrarla en android
 class Auditores(BaseModel):
     user:str
 
 @app.post("/login")
-async def endpoint_Login(user:Auditores):
-    return await login(user)
+async def endpoint_Login(user:Auditores,conn:str = Depends(conexion)):
+    return await login(user,conn)
 # guarda el token shares preferences y cuando sierre sesion pues se borra pero es desde android
-@app.get("/logout")
-async def endpoint_logout(token:str = Depends(oauth2_scheme)):
+@router.get("/logout")
+async def endpoint_logout():
     return  JSONResponse(content={"msg":"Sesion Cerrada exitosamente"},status_code=200)
 #consultas del dashboard de auditorias
 #no puedo llamar directamente a una funcion debe estar dentro de otra funcion
-@app.get("/pendientes/{fk_auditor_auditoria_det}/")
-async def endpoint_OrdenesPendientes(fk_auditor_auditoria_det:int,
-    token:str = Depends(oauth2_scheme)):
-    return await OrdenesPendientes(fk_auditor_auditoria_det)
+@router.get("/pendientes/{fk_auditor_auditoria_det}/")
+async def endpoint_OrdenesPendientes(fk_auditor_auditoria_det:int,conn:str = Depends(conexion)):
+    return await OrdenesPendientes(fk_auditor_auditoria_det,conn)
     
-@app.get("/detalle/ordenes/{folio_pisa}/")
-async def endpoint_DetalleOrdenes(folio_pisa,
-    token:str =Depends(oauth2_scheme)):
-    return await OrdenesDetalle(folio_pisa)  
+@router.get("/detalle/ordenes/{folio_pisa}/")
+async def endpoint_DetalleOrdenes(folio_pisa,conn:str = Depends(conexion)):
+    return await OrdenesDetalle(folio_pisa,conn)  
 
-@app.get("/valores/{folio_pisa}/{campos}")
+@router.get("/valores/{folio_pisa}/{campos}")
 async def endpoint_Valores(
     folio_pisa:str,
     campos:str,
-    token:str = Depends(oauth2_scheme)):
-    return await ValorClientePresente(folio_pisa,campos)  
+    conn:str = Depends(conexion)):
+    return await ValorClientePresente(folio_pisa,campos,conn)  
 #ignorar los campos q no bengan
 class Auditorias(BaseModel):
     Evidencia_Instalacion:str | None = None
@@ -50,9 +52,9 @@ class Auditorias(BaseModel):
     Foto_No_Ubicado:str | None = None
     Inicio_Traslado :str | None = None
 
-@app.put("/no/existe/{folio_pisa}/")
-async def endpoint_InsertNoExiste(folio_pisa,actu:Auditorias,token:str=Depends(oauth2_scheme)):
-    return await InsertNoExiste(folio_pisa,actu)  
+@router.put("/no/existe/{folio_pisa}/")
+async def endpoint_InsertNoExiste(folio_pisa,actu:Auditorias,conn:str = Depends(conexion)):
+    return await InsertNoExiste(folio_pisa,actu,conn)  
 
-
- 
+#las rutas de app son las que estan disponibles siempre las del apirouter se agregan
+app.include_router(router)
