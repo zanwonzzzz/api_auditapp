@@ -94,6 +94,7 @@ async def ValorClientePresente(folio_pisa,campos,conn=""):
     return JSONResponse (content= {'Valor':r},status_code=200)
 
 #sirbe pero obio debo mandar los datos llenos pq sino se sobreescriben
+#ignorart los que bienen bacios
 async def InsertNoExiste(folio_pisa,actu,conn=""):
     cur = await conn.cursor()
     sql = """
