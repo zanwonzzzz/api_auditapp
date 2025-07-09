@@ -66,6 +66,10 @@ class Auditorias(BaseModel):
 @router.put("/no/existe/{folio_pisa}/")
 async def endpoint_InsertNoExiste(folio_pisa,actu:Auditorias,conn:str = Depends(conexion)):
     return await InsertNoExiste(folio_pisa,actu,conn)  
+#convertir todas las rutas a JEISON
+@router.get("/copes")
+async def endpoint_Copes(conn:str = Depends(conexion)):
+    return await copes(conn)  
 
 #las rutas de app son las que estan disponibles siempre las del apirouter se agregan
 app.include_router(router)

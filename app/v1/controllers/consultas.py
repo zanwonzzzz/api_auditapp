@@ -110,7 +110,8 @@ async def InsertNoExiste(folio_pisa,actu,conn=""):
 
 async def copes(conn=""):
     cur = await conn.cursor()
-    await cur.execute(sql = "SELECT id,COPE FROM db_apps.copes")
+    sql = "SELECT id,COPE FROM db_apps.copes"
+    await cur.execute(sql)
     print(cur.description)
     r = await cur.fetchall()
     await cur.close()
