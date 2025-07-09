@@ -48,14 +48,26 @@ async def authenticate_user(user:dict,conn=""):
     #revisar esta condicion
     if user != r[0][4]:
         return  False
-    return user
+    return user #mandar toda la info del usuario pero en un json
+
+async def Auditor (form_data:Annotated[OAuth2PasswordRequestForm,Depends()],conn=""):
+    print(form_data.user)
+    cur = await conn.cursor()
+    sql = "SELECT idAuditor FROM Auditores WHERE user = %s"
+    await cur.execute(sql,(form_data.user))
+    r = await cur.fetchall()
+    await cur.close()
+    conn.close()
+    fk_auditor = r[0][0]
+    return fk_auditor
+
 
 async def login(form_data:Annotated[OAuth2PasswordRequestForm,Depends()],conn=""):
     user = await authenticate_user(form_data.user,conn)
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect username or password")
     users = {'user':user}
-    return await encode_token(users) 
+    return await encode_token(users)
 
 #estoi pensando en agregar notificaciones cuando se asgine una nueva auditoria 
 async def OrdenesPendientes(fk_auditor_auditoria_det="",conn=""):

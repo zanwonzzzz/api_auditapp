@@ -71,5 +71,9 @@ async def endpoint_InsertNoExiste(folio_pisa,actu:Auditorias,conn:str = Depends(
 async def endpoint_Copes(conn:str = Depends(conexion)):
     return await copes(conn)  
 
+@router.post("/auditor")
+async def endpoint_Auditor(user:Auditores,conn:str = Depends(conexion)):
+    return await Auditor(user,conn)  
+
 #las rutas de app son las que estan disponibles siempre las del apirouter se agregan
 app.include_router(router)
