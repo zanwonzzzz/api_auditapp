@@ -68,7 +68,7 @@ async def OrdenesPendientes(fk_auditor_auditoria_det="",conn=""):
     conn.close()
     return JSONResponse (
         content= {
-            'Ordenes Pendientes':r
+            'Ordenes_Pendientes':r
         },
         status_code=200
     )

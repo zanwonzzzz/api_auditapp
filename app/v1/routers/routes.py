@@ -5,12 +5,25 @@ import os
 from fastapi.responses import JSONResponse
 from app.v1.controllers.consultas import *
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 
+origins = [
+    "http://localhost:5173"
+]
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 router = APIRouter(
     prefix="/api",
     dependencies= [Depends(oauth2_scheme)]
 )
+
 load_dotenv()
 class Auditores(BaseModel):
     user:str
