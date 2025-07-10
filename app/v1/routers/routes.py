@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 from app.v1.controllers.consultas import *
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+from app.v1.model.Auditorias import *
 
 origins = [
     "http://localhost:5173"
@@ -25,12 +26,10 @@ router = APIRouter(
 )
 
 load_dotenv()
-class Auditores(BaseModel):
-    user:str
-
+#decordador para la conexion a la base de datos
 @app.post("/login")
-async def endpoint_Login(user:Auditores,conn:str = Depends(conexion)):
-    return await login(user,conn)
+async def endpoint_Login(user:Login_data,conn:str = Depends(conexion)):
+    return await login(user.user,conn)
 # guarda el token shares preferences y cuando sierre sesion pues se borra pero es desde android
 @router.get("/logout")
 async def endpoint_logout():
@@ -50,18 +49,6 @@ async def endpoint_Valores(
     campos:str,
     conn:str = Depends(conexion)):
     return await ValorClientePresente(folio_pisa,campos,conn)  
-#ignorar los campos q no bengan
-class Auditorias(BaseModel):
-    Evidencia_Instalacion:str | None = None
-    P_Observaciones_Finales:str | None = None
-    P_Domicilio:str | None = None
-    Estatus_Auditoria:str | None = None
-    lat_auditor:str | None = None
-    lon_auditor:str | None = None
-    Fecha_Fin:str | None = None
-    Existe_Instalacion:str | None = None
-    Foto_No_Ubicado:str | None = None
-    Inicio_Traslado :str | None = None
 
 @router.put("/no/existe/{folio_pisa}/")
 async def endpoint_InsertNoExiste(folio_pisa,actu:Auditorias,conn:str = Depends(conexion)):
@@ -71,9 +58,9 @@ async def endpoint_InsertNoExiste(folio_pisa,actu:Auditorias,conn:str = Depends(
 async def endpoint_Copes(conn:str = Depends(conexion)):
     return await copes(conn)  
 
-@router.post("/auditor")
-async def endpoint_Auditor(user:Auditores,conn:str = Depends(conexion)):
-    return await Auditor(user,conn)  
+@router.get("/distritos/{id_cope}")
+async def endpoint_Distritos(id_cope,conn:str = Depends(conexion)):
+    return await DistritosPorCopes(id_cope,conn) 
 
 #las rutas de app son las que estan disponibles siempre las del apirouter se agregan
 app.include_router(router)
