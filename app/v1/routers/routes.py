@@ -62,5 +62,9 @@ async def endpoint_Copes(conn:str = Depends(conexion)):
 async def endpoint_Distritos(id_cope,conn:str = Depends(conexion)):
     return await DistritosPorCopes(id_cope,conn) 
 
+@router.get("/validar/folio/{folio_pisa}")
+async def endpoint_ValidarFolio(folio_pisa,conn:str = Depends(conexion)):
+    return await ValidarFolio(folio_pisa,conn) 
+
 #las rutas de app son las que estan disponibles siempre las del apirouter se agregan
 app.include_router(router)
