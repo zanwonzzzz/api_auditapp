@@ -93,9 +93,7 @@ async def ValorClientePresente(folio_pisa,campos,conn=""):
     conn.close()
     return JSONResponse (content= {'Valor':r},status_code=200)
 
-
-#sirbe pero obio debo mandar los datos llenos pq sino se sobreescriben
-#ignorart los que bienen bacios
+#sirbe solo falta aser esto mas sencillo los campos
 async def InsertNoExiste(folio_pisa, actu, conn=""):
     campos = [
         ("Foto_No_Ubicado", actu.Foto_No_Ubicado),
