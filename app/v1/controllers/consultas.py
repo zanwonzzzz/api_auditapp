@@ -93,6 +93,16 @@ async def ValorClientePresente(folio_pisa,campos,conn=""):
     conn.close()
     return JSONResponse (content= {'Valor':r},status_code=200)
 
+async def ValoresTecnico(folio_pisa,campos,conn=""):
+    cur = await conn.cursor()
+    sql =  f"SELECT {campos} FROM db_apps.tecnico_instalaciones_coordiapp  WHERE Folio_Pisa = %s"
+    await cur.execute(sql,(folio_pisa))
+    print(cur.description)
+    r = await cur.fetchall()
+    await cur.close()
+    conn.close()
+    return JSONResponse (content= {'Valor_Tecnico':r},status_code=200)
+
 #sirbe solo falta aser esto mas sencillo los campos
 async def InsertNoExiste(folio_pisa, actu, conn=""):
     campos = [
@@ -215,7 +225,7 @@ async def DistritosPorCopes(id_cope,conn=""):
     r = await cur.fetchall()
     await cur.close()
     conn.close()
-    return JSONResponse (content= {'Distritos por Cope':r},status_code=200)
+    return JSONResponse (content= {'Distritos':r},status_code=200)
 
 
 async def ValidarFolio(folio_pisa,conn=""):
@@ -226,4 +236,15 @@ async def ValidarFolio(folio_pisa,conn=""):
     r = await cur.fetchall()
     await cur.close()
     conn.close()
-    return JSONResponse (content= {'Validacion del Folio':r},status_code=200)
+    return JSONResponse (content= {'Validacion_Folio':r},status_code=200)
+
+async def InsertAuditoria(folio_pisa,actu,conn=""):
+    cur = await conn.cursor()
+    sql = """INSERT INTO Auditorias_Det (Folio_Pisa, FK_Auditor_Auditoria_Det, Fecha_Inicio, Estatus_Auditoria,Tecnologia_Auditor)
+            VALUES (%s, %s, %s, %s,%s)"""
+    await cur.execute(sql,(folio_pisa,actu.Auditor,actu.Fecha_Inicio,actu.Estatus_Auditoria,actu.Tecnologia_Auditor))
+    print(cur.description)
+    r = await cur.fetchall()
+    await cur.close()
+    conn.close()
+    return JSONResponse (content= {'msg':'Datos insertados correctamente'},status_code=200)

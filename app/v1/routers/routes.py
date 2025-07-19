@@ -9,7 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.v1.model.Auditorias import *
 
 origins = [
-    "http://localhost:5173"
+    "http://localhost:5173",
+    "http://localhost:4173",
 ]
 app = FastAPI()
 app.add_middleware(
@@ -50,6 +51,13 @@ async def endpoint_Valores(
     conn:str = Depends(conexion)):
     return await ValorClientePresente(folio_pisa,campos,conn)  
 
+@router.get("/valores/tecnico/{folio_pisa}/{campos}")
+async def endpoint_Valores(
+    folio_pisa:str,
+    campos:str,
+    conn:str = Depends(conexion)):
+    return await ValoresTecnico(folio_pisa,campos,conn)  
+
 @router.put("/no/existe/{folio_pisa}/")
 async def endpoint_InsertNoExiste(folio_pisa,actu:Auditorias,conn:str = Depends(conexion)):
     return await InsertNoExiste(folio_pisa,actu,conn)  
@@ -65,6 +73,10 @@ async def endpoint_Distritos(id_cope,conn:str = Depends(conexion)):
 @router.get("/validar/folio/{folio_pisa}")
 async def endpoint_ValidarFolio(folio_pisa,conn:str = Depends(conexion)):
     return await ValidarFolio(folio_pisa,conn) 
+
+@router.post("/nueva/auditoria/{folio_pisa}/")
+async def endpoint_NuevaAuditoria(folio_pisa,actu:AuditoriaNueva,conn:str = Depends(conexion)):
+    return await InsertAuditoria(folio_pisa,actu,conn)  
 
 #las rutas de app son las que estan disponibles siempre las del apirouter se agregan
 app.include_router(router)

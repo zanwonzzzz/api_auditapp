@@ -82,3 +82,9 @@ class Auditorias(BaseModel):
 
 class Login_data(BaseModel):
     user:str
+
+class AuditoriaNueva(BaseModel):
+    Auditor:int
+    Fecha_Inicio:str
+    Estatus_Auditoria:str
+    Tecnologia_Auditor:str | None = None
