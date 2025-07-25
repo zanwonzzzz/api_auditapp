@@ -243,8 +243,8 @@ async def InsertAuditoria(folio_pisa,actu,conn=""):
     sql = """INSERT INTO Auditorias_Det (Folio_Pisa, FK_Auditor_Auditoria_Det, Fecha_Inicio, Estatus_Auditoria,Tecnologia_Auditor)
             VALUES (%s, %s, %s, %s,%s)"""
     await cur.execute(sql,(folio_pisa,actu.Auditor,actu.Fecha_Inicio,actu.Estatus_Auditoria,actu.Tecnologia_Auditor))
-    print(cur.description)
-    r = await cur.fetchall()
+    await conn.commit()
     await cur.close()
     conn.close()
     return JSONResponse (content= {'msg':'Datos insertados correctamente'},status_code=200)
+
