@@ -11,6 +11,7 @@ from app.v1.model.Auditorias import *
 origins = [
     "http://localhost:5173",
     "http://localhost:4173",
+    "http://localhost:65391"
 ]
 app = FastAPI()
 app.add_middleware(
