@@ -248,3 +248,23 @@ async def InsertAuditoria(folio_pisa,actu,conn=""):
     conn.close()
     return JSONResponse (content= {'msg':'Datos insertados correctamente'},status_code=200)
 
+async def UpdateTokenFCM(idAuditor,actu,conn=""):
+    cur = await conn.cursor()
+    sql = """UPDATE Auditores SET token = %s WHERE idAuditor = %s"""
+    await cur.execute(sql,(actu.token,idAuditor))
+    await conn.commit()
+    await cur.close()
+    conn.close()
+    return JSONResponse (content= {'msg':'Token listo'},status_code=200)
+
+async def getTokenFCM(idAuditor,conn=""):
+    cur = await conn.cursor()
+    sql = """SELECT token FROM  Auditores WHERE idAuditor = %s"""
+    await cur.execute(sql,(idAuditor))
+    print(cur.description)
+    r = await cur.fetchall()
+    await cur.close()
+    conn.close()
+    return JSONResponse (content= {'token':r},status_code=200)
+
+

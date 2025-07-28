@@ -88,3 +88,8 @@ class AuditoriaNueva(BaseModel):
     Fecha_Inicio:str
     Estatus_Auditoria:str
     Tecnologia_Auditor:str | None = None
+
+
+class Token(BaseModel):
+    token:str | None = None
+

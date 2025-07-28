@@ -10,8 +10,12 @@ from app.v1.model.Auditorias import *
 
 origins = [
     "http://localhost:5173",
+     "http://localhost:5174",
     "http://localhost:4173",
-    "http://localhost:65391"
+    "http://localhost:65391",
+    "http://localhost:52257",
+    "http://localhost:3000",
+    "https://4c0655657fdf.ngrok-free.app"
 ]
 app = FastAPI()
 app.add_middleware(
@@ -78,6 +82,14 @@ async def endpoint_ValidarFolio(folio_pisa,conn:str = Depends(conexion)):
 @router.post("/nueva/auditoria/{folio_pisa}/")
 async def endpoint_NuevaAuditoria(folio_pisa,actu:AuditoriaNueva,conn:str = Depends(conexion)):
     return await InsertAuditoria(folio_pisa,actu,conn)  
+
+@router.put("/token/{idAuditor}/")
+async def endpoint_UpdateToken(idAuditor,actu:Token,conn:str = Depends(conexion)):
+    return await UpdateTokenFCM(idAuditor,actu,conn)  
+
+@router.get("/token/fcm/{idAuditor}/")
+async def endpoint_getToken(idAuditor,conn:str = Depends(conexion)):
+    return await getTokenFCM(idAuditor,conn)  
 
 #las rutas de app son las que estan disponibles siempre las del apirouter se agregan
 app.include_router(router)
